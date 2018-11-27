@@ -19,7 +19,7 @@
                         :else t)))]
     (go t)))
 
-(def pprint-right-margin #_72 100 #_120)
+(def pprint-right-margin 72 #_100 #_120)
 (defn show  [t] (show-core true t))
 (defn show- [t] (show-core nil t))
 (defn showp [t]
@@ -298,8 +298,7 @@
 (comment
   (showp- coin-by-id)
   (showp coin-by-id)
-  (mapv #(raw-to-int [coin-by-id (church-num %)])
-        [1 2 3 4 5]))
+  (mapv #(raw-to-int [coin-by-id (church-num %)]) [1 2 3 4 5]))
 
 ;; coin change
 
