@@ -19,7 +19,7 @@
                         :else t)))]
     (go t)))
 
-(def pprint-right-margin 72 #_100 #_120)
+(def pprint-right-margin #_72 100 #_120)
 (defn show  [t] (show-core true t))
 (defn show- [t] (show-core nil t))
 (defn showp [t]
@@ -243,7 +243,7 @@
 
 (comment
   (showp- fib)
-  (fix-to-int [fib (church-num 20)]))
+  (fix-to-int [fib (church-num 10)]))
 
 
 ;; Fibonacci - linear recurtion
@@ -332,3 +332,33 @@
   (showp- height)
   (fix-to-int [height two (church-num 14)]))
 
+
+;; Without 2 zeroes
+
+;; (defn f [z o v]
+;;   (if
+;;    (= 0 z o) 1
+;;    (+ (if (or (= z 0) (= v 0)) 0 (f (dec z) o 0))
+;;       (if (= o 0) 0 (f z (dec o) 1)))))
+
+;; (f 2 2 1)
+;; (f 1 1 1)
+;; (f 1 3 1)
+;; (f 2 4 1)
+;; (f 4 9 1)
+
+(def without-2-zeroes
+  (to-ski (lam [:f :z :o :v]
+               [[is-zero-strict [add :z :o]] one
+                [add
+                 [[is-zero [mul :z :v]] zero (lam [:x] [:f [pred :z] :o zero])]
+                 [[is-zero :o] zero (lam [:x] [:f :z [pred :o] one])]]])))
+
+(comment
+  (showp- without-2-zeroes)
+  (fix-to-int [without-2-zeroes two two one])
+  (fix-to-int [without-2-zeroes one one one])
+  (fix-to-int [without-2-zeroes one (church-num 3) one])
+  (fix-to-int [without-2-zeroes two (church-num 4) one])
+  (fix-to-int [without-2-zeroes (church-num 4) (church-num 9) one])
+  )

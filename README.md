@@ -83,12 +83,18 @@ load namespace ski and evaluate forms
     
     ski=> (fix-to-int [fact (church-num 6)])
     720
+    ski=> (fix-to-int [fib (church-num 10)])
+    55
+    ski=> (fix-to-int [fib-iter zero one (church-num 20)])
+    6765
     ski=> (mapv #(raw-to-int [coin-by-id (church-num %)]) [1 2 3 4 5])
     [1 5 10 25 50]
     ski=> (fix-to-int [cc (church-num 50) (church-num 5)])
     97
     ski=> (fix-to-int [height two (church-num 14)])
     105
+    ski=> (fix-to-int [without-2-zeroes (church-num 4) (church-num 9) one])
+    210
 
 
 ## License

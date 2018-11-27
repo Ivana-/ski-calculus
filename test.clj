@@ -18,7 +18,7 @@
          (prn test-settings)
          
          ;; different realizations of I
-
+         
          (is (= (case basis
                   :ski 'I
                   :sk '((S K) K))
@@ -55,6 +55,8 @@
 
          ;; recursive functions
          
+         (is (= fix (if (= 0 fix-variant) Z-0 Z-1)))
+
          (is (= 720 (fix-to-int [fact (church-num 6)])))
 
          (is (= 55 (fix-to-int [fib (church-num 10)])))
@@ -70,6 +72,8 @@
          (is (= 97 (fix-to-int [cc (church-num 50) (church-num 5)])))
 
          (is (= 105 (fix-to-int [height two (church-num 14)])))
+
+         (is (= 210 (fix-to-int [without-2-zeroes (church-num 4) (church-num 9) one])))
 
          )))))
 
