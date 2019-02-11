@@ -75,7 +75,7 @@
 
 (comment
   (show I)
-  (-> [S K K] to-ski show #_((fn [t] ((eval t) 1)))))
+  (-> [S K K] to-ski ((fn [t] ((eval t) 1)))))
 
 
 (def B (to-ski 'B [S [K S] K]))        ;; Compositor
@@ -107,7 +107,7 @@
   (show- f3)
   (show f3)
   (show- (church-num 5))
-  (church-to-int f3))
+  (church-to-str f3))
 
 
 (def add (to-ski 'add [C I [S B]]))
@@ -232,7 +232,7 @@
 (def fact (to-ski (lam [:f :x] [if* [is-zero :x] one (lam [:z] [mul :x [:f [pred :x]]])])))
 
 (comment
-  (showp- fact)
+  (showp fact)
   (fix-to-int [fact (church-num 6)]))
 
 
@@ -307,12 +307,14 @@
 ;;         ((or (< amount 0) (= kinds-of-coins 0)) 0)
 ;;         (else (+ (cc amount (- kinds-of-coins 1)) (cc (- amount (denom kinds-of-coins)) kinds-of-coins)))))
 
-(def cc (to-ski (lam [:f :a :k] [#_if* [is-zero-strict :a] one
-                                 [#_if* [is-zero :k] zero
-                                  (lam [:z2]
-                                       [add [:f :a [pred :k]]
-                                        [#_if* [is-zero [sub [add :a one] [exp :k two] #_[coin-by-id :k]]] zero
-                                         (lam [:z3] [:f [sub :a [exp :k two] #_[coin-by-id :k]] :k])]])]])))
+(def cc (to-ski
+         (lam [:f :a :k]
+              [#_if* [is-zero-strict :a] one
+               [#_if* [is-zero :k] zero
+                (lam [:z2]
+                     [add [:f :a [pred :k]]
+                      [#_if* [is-zero [sub [add :a one] [exp :k two] #_[coin-by-id :k]]] zero
+                       (lam [:z3] [:f [sub :a [exp :k two] #_[coin-by-id :k]] :k])]])]])))
 
 (comment
   (showp- cc)
@@ -355,7 +357,7 @@
                  [[is-zero :o] zero (lam [:x] [:f :z [pred :o] one])]]])))
 
 (comment
-  (showp- without-2-zeroes)
+  (showp without-2-zeroes)
   (fix-to-int [without-2-zeroes two two one])
   (fix-to-int [without-2-zeroes one one one])
   (fix-to-int [without-2-zeroes one (church-num 3) one])

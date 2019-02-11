@@ -2,6 +2,8 @@
 
 Simple SKI-based combinator calculus interpreter, written in Clojure.
 
+## [See on youtube](https://www.youtube.com/watch?v=seip81vYvuA)
+
 ## Overview
 
 This project presents an inner representation of SKI-based combinator terms, DSL for writing new terms (with ability of creation new closed-form lambda abstractions), translating it to SKI-based combinator form and functions for evaluation and pretty user representation of this terms.
