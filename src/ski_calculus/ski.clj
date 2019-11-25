@@ -358,16 +358,17 @@
 
 
 ;; coin values
-(def coin-by-id (to-ski (lam [:x] [#_if* [is-zero-strict [pred :x]] (church-num 1)
-                                   [#_if* [is-zero-strict [sub :x (church-num 2)]] (church-num 5)
-                                    [#_if* [is-zero-strict [sub :x (church-num 3)]] (church-num 10)
-                                     [#_if* [is-zero-strict [sub :x (church-num 4)]]
-                                      [exp (church-num 5) two]
-                                      [mul [exp (church-num 5) two] two]]]]])))
+(def coin-by-id-classic
+  (to-ski (lam [:x] [#_if* [is-zero-strict [pred :x]] (church-num 1)
+                     [#_if* [is-zero-strict [sub :x (church-num 2)]] (church-num 5)
+                      [#_if* [is-zero-strict [sub :x (church-num 3)]] (church-num 10)
+                       [#_if* [is-zero-strict [sub :x (church-num 4)]]
+                        [exp (church-num 5) two]
+                        [mul [exp (church-num 5) two] two]]]]])))
 (comment
-  (showp- coin-by-id)
-  (showp coin-by-id)
-  (mapv #(raw-to-int [coin-by-id (church-num %)]) [1 2 3 4 5])
+  (showp- coin-by-id-classic)
+  (showp coin-by-id-classic)
+  (mapv #(raw-to-int [coin-by-id-classic (church-num %)]) [1 2 3 4 5])
   )
 
 ;; coin change
@@ -377,14 +378,17 @@
 ;;         ((or (< amount 0) (= kinds-of-coins 0)) 0)
 ;;         (else (+ (cc amount (- kinds-of-coins 1)) (cc (- amount (denom kinds-of-coins)) kinds-of-coins)))))
 
+; (def coin-by-id coin-by-id-classic) ; Syntax error: Method code too large!
+(def coin-by-id (to-ski (lam [:x] [exp :x two])))
+
 (def cc (to-ski
          (lam [:f :a :k]
               [#_if* [is-zero-strict :a] one
                [#_if* [is-zero :k] zero
                 (lam [:z2]
                      [add [:f :a [pred :k]]
-                      [#_if* [is-zero [sub [add :a one] [exp :k two] #_[coin-by-id :k]]] zero
-                       (lam [:z3] [:f [sub :a [exp :k two] #_[coin-by-id :k]] :k])]])]])))
+                      [#_if* [is-zero [sub [add :a one] [coin-by-id :k]]] zero
+                       (lam [:z3] [:f [sub :a [coin-by-id :k]] :k])]])]])))
 
 (comment
   (showp- cc)

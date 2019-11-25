@@ -66,6 +66,10 @@
          (is (= 91 (fix-to-int [bar (church-num 6) zero])))
 
          (is (= [1 5 10 25 50]
+                (mapv #(raw-to-int [coin-by-id-classic (church-num %)])
+                      [1 2 3 4 5])))
+
+         (is (= [1 4 9 16 25]
                 (mapv #(raw-to-int [coin-by-id (church-num %)])
                       [1 2 3 4 5])))
 
