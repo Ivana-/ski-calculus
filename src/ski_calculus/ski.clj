@@ -1,6 +1,6 @@
-(ns ski
+(ns ski-calculus.ski
   (:require [clojure.string :as str]
-            [settings :as settings]))
+            [ski-calculus.settings :as settings]))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -74,8 +74,25 @@
          (with-meta (seq [(seq [S K]) K]) {:name 'I})))
 
 (comment
+
   (show I)
-  (-> [S K K] to-ski ((fn [t] ((eval t) 1)))))
+
+  (-> [S K K]
+      to-ski)
+
+  (-> [S K K]
+      to-ski
+      show)
+
+  (let [f (-> [S K K]
+              to-ski
+              eval)]
+    f
+    (f 42) ;
+    (f "zazaza") ;
+    )
+  ;;
+  )
 
 
 (def B (to-ski 'B [S [K S] K]))        ;; Compositor
@@ -84,7 +101,11 @@
 
 (comment
   (show B)
-  (show C))
+  (show- B)
+  (show C)
+  (show- C)
+  ;;
+  )
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -107,7 +128,10 @@
   (show- f3)
   (show f3)
   (show- (church-num 5))
-  (church-to-str f3))
+  (church-to-int f3)
+  (church-to-str f3)
+  ;;
+  )
 
 
 (def add (to-ski 'add [C I [S B]]))
@@ -126,7 +150,9 @@
   (def x (to-ski [exp (church-num 5) (church-num 3)]))
   (show- x)
   (church-to-int x)
-  (church-to-str x))
+  (church-to-str x)
+  ;;
+  )
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -138,13 +164,20 @@
 
 (comment
   (def b (lam [:x :y :z] [:x [:y :z]]))
-  (-> b to-ski showp-))
+  b
+  (-> b to-ski showp-)
+  ;;
+  )
 
 (def pif (to-ski (lam [:x :y] [add [mul :x :x] [mul :y :y]])))
 
 (comment
   (showp pif)
-  (raw-to-int [pif (church-num 5) (church-num 6)]))
+  (-> [pif (church-num 5) (church-num 6)] to-ski showp)
+  (-> [pif (church-num 5) (church-num 6)] to-ski showp-)
+  (raw-to-int [pif (church-num 5) (church-num 6)])
+  ;;
+  )
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -152,14 +185,30 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
+(comment
+  (defn lazy-if [p by-true by-false] (if p by-true by-false))
+  (lazy-if true 1 2)
+  (lazy-if false 1 2)
+
+  (lazy-if true 1 (/ 1 0)) ; Execution error!
+
+  ;; ???????
+
+  ;;
+  )
+
+
 (def true* K) ;; (to-ski (lam [:x :y] :x))
-(def false*      (to-ski 'lazy-false (lam [:x :y] [:y I]))) ;; convention, that y is lambda!
+(def false* (to-ski 'lazy-false (lam [:x :y] [:y I]))) ;; convention, that y is lambda!
 (def if* I) ;; (show- (to-ski (lam [:p :t :f] [:p :t :f])))
 
 (comment
   (show false*)
-  (eval #_show- (to-ski [if* true*  1 2]))
-  (eval (to-ski [if* false* 1 (lam [:z] 2)])))
+  (eval (to-ski [if* true*   1 2]))
+  (eval (to-ski [if* false*  1 2])) ; Execution error
+  (eval (to-ski [if* false* 1 (lam [:z] 2)]))
+  ;;
+  )
 
 
 (def zero (church-num 'zero 0))
@@ -174,7 +223,9 @@
   (show- tst)
   (showp tst)
   (raw-to-int [tst zero])
-  (raw-to-int [tst two]))
+  (raw-to-int [tst (church-num 33)])
+  ;;
+  )
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -188,13 +239,17 @@
 
 (comment
   (raw-to-int [fst [pair one two]])
-  (raw-to-int [snd [pair one two]]))
+  (raw-to-int [snd [pair one two]])
+  ;;
+  )
 
 (def pred (to-ski 'pred (lam [:n :s :z] [snd [:n (lam [:p] [pair [:s [fst :p]] [fst :p]]) [pair :z :z]]])))
 
 (comment
   (showp pred)
-  (raw-to-int [pred (church-num 55)]))
+  (raw-to-int [pred (church-num 55)])
+  ;;
+  )
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -218,7 +273,9 @@
 (comment
   (show (to-ski (lam [:f] [:f :f])))
   (showp Z-0)
-  (showp Z-1))
+  (showp Z-1)
+  ;;
+  )
 
 (defn fix-to-int [v] (-> (into [fix] v) to-ski church-to-int))
 
@@ -233,25 +290,31 @@
 
 (comment
   (showp fact)
-  (fix-to-int [fact (church-num 6)]))
+  (fix-to-int [fact (church-num 6)])
+  ;;
+  )
 
 
-;; Fibonacci - exponential recurtion
+;; Fibonacci - exponential recursion
 (def fib (to-ski (lam [:f :x] [if* [is-zero :x] zero
                                (lam [:z1] [if* [is-zero [pred :x]] one
                                            (lam [:z2] [add [:f [pred :x]] [:f [pred [pred :x]]]])])])))
 
 (comment
   (showp- fib)
-  (fix-to-int [fib (church-num 10)]))
+  (fix-to-int [fib (church-num 10)])
+  ;;
+  )
 
 
-;; Fibonacci - linear recurtion
+;; Fibonacci - linear recursion
 (def fib-iter (to-ski (lam [:f :a :b :x] [if* [is-zero :x] :a (lam [:z] [:f :b [add :a :b] [pred :x]])])))
 
 (comment
   (showp- fib-iter)
-  (fix-to-int [fib-iter zero one (church-num 20)]))
+  (fix-to-int [fib-iter zero one (church-num 20)])
+  ;;
+  )
 
 
 ;; Sum of squares - non tail recursive
@@ -259,14 +322,18 @@
 
 (comment
   (showp- foo)
-  (fix-to-int [foo (church-num 6)]))
+  (fix-to-int [foo (church-num 6)])
+  ;;
+  )
 
 ;; Sum of squares - tail recursive
 (def bar (to-ski (lam [:f :x :a] [if* [is-zero :x] :a (lam [:z] [:f [pred :x] [add [mul :x :x] :a]])])))
 
 (comment
   (showp- bar)
-  (fix-to-int [bar (church-num 6) zero]))
+  (fix-to-int [bar (church-num 6) zero])
+  ;;
+  )
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -279,7 +346,9 @@
 
 (comment
   (showp sub)
-  (raw-to-int [sub (church-num 16) (church-num 4)]))
+  (raw-to-int [sub (church-num 16) (church-num 4)])
+  ;;
+  )
 
 
 ;; strict predicate
@@ -298,7 +367,8 @@
 (comment
   (showp- coin-by-id)
   (showp coin-by-id)
-  (mapv #(raw-to-int [coin-by-id (church-num %)]) [1 2 3 4 5]))
+  (mapv #(raw-to-int [coin-by-id (church-num %)]) [1 2 3 4 5])
+  )
 
 ;; coin change
 
@@ -318,7 +388,9 @@
 
 (comment
   (showp- cc)
-  (fix-to-int [cc (church-num 50) (church-num 5)]))
+  (fix-to-int [cc (church-num 50) (church-num 5)])
+  ;;
+  )
 
 
 ;; Eggs crash test
@@ -332,7 +404,9 @@
 
 (comment
   (showp- height)
-  (fix-to-int [height two (church-num 14)]))
+  (fix-to-int [height two (church-num 14)])
+  ;;
+  )
 
 
 ;; Without 2 zeroes
@@ -363,4 +437,5 @@
   (fix-to-int [without-2-zeroes one (church-num 3) one])
   (fix-to-int [without-2-zeroes two (church-num 4) one])
   (fix-to-int [without-2-zeroes (church-num 4) (church-num 9) one])
+  ;;
   )
