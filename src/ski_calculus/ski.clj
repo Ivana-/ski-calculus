@@ -1,5 +1,6 @@
 (ns ski-calculus.ski
-  (:require [clojure.string :as str]
+  (:require [clojure.pprint :as pprint]
+            [clojure.test :as test]
             [ski-calculus.settings :as settings]))
 
 
@@ -9,26 +10,27 @@
 
 
 (defn show-core [base-level? t]
-  (letfn [(go [t] (or (if-not base-level? (:name (meta t)))
+  (letfn [(go [t] (or (when-not base-level? (:name (meta t)))
                       (:base-name (meta t))
                       (cond
-                        (clojure.test/function? t) 'fn
+                        (test/function? t) 'fn
                         (seq? t) (map go t)
                         (vector? t) (mapv go t)
                         (map? t) (reduce (fn [acc [k v]] (assoc acc k (go v))) {} t)
                         :else t)))]
     (go t)))
 
-(def pprint-right-margin #_72 100 #_120)
 (defn show  [t] (show-core true t))
-(defn show- [t] (show-core nil t))
+(defn show- [t] (show-core false t))
+
+; (def pprint-right-margin #_72 100 #_120)
 (defn showp [t]
-  (binding [clojure.pprint/*print-right-margin* pprint-right-margin]
-    (clojure.pprint/pprint (show-core true t)))
+  ; (binding [pprint/*print-right-margin* pprint-right-margin]
+  (pprint/pprint (show t))
   (symbol " "))
 (defn showp- [t]
-  (binding [clojure.pprint/*print-right-margin* pprint-right-margin]
-    (clojure.pprint/pprint (show-core nil t)))
+  ; (binding [pprint/*print-right-margin* pprint-right-margin]
+  (pprint/pprint (show- t))
   (symbol " "))
 
 
@@ -87,10 +89,7 @@
   (let [f (-> [S K K]
               to-ski
               eval)]
-    f
-    (f 42) ;
-    (f "zazaza") ;
-    )
+    (f "zazaza"))
   ;;
   )
 
@@ -128,6 +127,7 @@
   (show- f3)
   (show f3)
   (show- (church-num 5))
+  (show (church-num 5))
   (church-to-int f3)
   (church-to-str f3)
   ;;
@@ -289,6 +289,7 @@
 (def fact (to-ski (lam [:f :x] [if* [is-zero :x] one (lam [:z] [mul :x [:f [pred :x]]])])))
 
 (comment
+  (showp- fact)
   (showp fact)
   (fix-to-int [fact (church-num 6)])
   ;;
@@ -302,6 +303,7 @@
 
 (comment
   (showp- fib)
+  (showp fib)
   (fix-to-int [fib (church-num 10)])
   ;;
   )
@@ -312,6 +314,7 @@
 
 (comment
   (showp- fib-iter)
+  (showp fib-iter)
   (fix-to-int [fib-iter zero one (church-num 20)])
   ;;
   )
@@ -322,6 +325,7 @@
 
 (comment
   (showp- foo)
+  (showp foo)
   (fix-to-int [foo (church-num 6)])
   ;;
   )
@@ -331,6 +335,7 @@
 
 (comment
   (showp- bar)
+  (showp bar)
   (fix-to-int [bar (church-num 6) zero])
   ;;
   )
