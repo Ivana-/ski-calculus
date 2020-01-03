@@ -1,6 +1,5 @@
 (ns ski-calculus.ski
   (:require [clojure.pprint :as pprint]
-            [clojure.test :as test]
             [ski-calculus.settings :as settings]))
 
 
@@ -13,7 +12,7 @@
   (letfn [(go [t] (or (when-not base-level? (:name (meta t)))
                       (:base-name (meta t))
                       (cond
-                        (test/function? t) 'fn
+                        (fn? t) 'fn
                         (seq? t) (map go t)
                         (vector? t) (mapv go t)
                         (map? t) (reduce (fn [acc [k v]] (assoc acc k (go v))) {} t)
@@ -23,15 +22,37 @@
 (defn show  [t] (show-core true t))
 (defn show- [t] (show-core false t))
 
-; (def pprint-right-margin #_72 100 #_120)
-(defn showp [t]
-  ; (binding [pprint/*print-right-margin* pprint-right-margin]
+(defn showp [t] ; (binding [pprint/*print-right-margin* 100]
   (pprint/pprint (show t))
   (symbol " "))
 (defn showp- [t]
-  ; (binding [pprint/*print-right-margin* pprint-right-margin]
   (pprint/pprint (show- t))
   (symbol " "))
+
+
+
+
+
+
+
+;; Sxyz = xz(yz)     ;; Connector
+
+;; Kxy = x           ;; Cancellator
+
+;; Ix = x
+
+;; SKKx = Kx(Kx) = x = I
+
+;; SKSx = Kx(Sx) = x = I
+
+;; SK_x = Kx(_x) = x = I
+
+
+
+
+
+
+
 
 
 ;; transform (Var x) = Var x
